@@ -1,0 +1,21 @@
+"""Module for the Game Settings"""
+
+WINDOW_WIDTH = 800
+WINDOW_HEIGHT = 600
+WINDOW_SIZE = (WINDOW_WIDTH, WINDOW_HEIGHT)
+FPS = 60
+
+
+# Player Settings
+PLAYER_SPEED = 100
+PLAYER_SCALE = 3
+
+# Tile Settings
+TILE_SIZE = 16
+TILE_STYLE = ""
+TILE_SCALE = 1
+
+# Pipe Settings
+PIPE_WIDTH = 32
+PIPE_SCALE = 3
+PIPE_HEIGHT = 48
