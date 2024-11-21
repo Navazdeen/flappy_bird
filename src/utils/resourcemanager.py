@@ -1,9 +1,13 @@
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List, TYPE_CHECKING
 import pygame
 from dataclasses import dataclass, field
 from utils import settings
-from functools import lru_cache
+from gameobjects.pipes import Pipe
+import random
+
+if TYPE_CHECKING:
+    from ..game import Game
 
 
 @dataclass
@@ -45,7 +49,11 @@ class BackgroundStyle:
     def __init__(self, BackgroundPath: Path) -> None:
         self.BackgroundPath: Path = BackgroundPath
         self.Modern: pygame.Surface = self._load_image("Background1.png")
-        self.Retro: pygame.Surface = self._load_image("Background1.png")
+        self.Retro: pygame.Surface = self._load_image("Background2.png")
+        self.City: pygame.Surface = self._load_image("Background3.png")
+        self.CityNight: pygame.Surface = self._load_image("Background4.png")
+        self.CityNightLight: pygame.Surface = self._load_image("Background5.png")
+        self.Dessert: pygame.Surface = self._load_image("Background9.png")
 
     def _load_image(self, image: str) -> pygame.Surface:
         return pygame.transform.scale(
@@ -63,7 +71,7 @@ class TileType:
     BASE_TILE_PATH: Path
     Tile_Name: str
 
-    TILE_POS: Tuple[int, int] = field(default=(0, 2 * settings.TILE_SIZE))
+    TILE_POS: Tuple[int, int] = field(default=(0, 48))
     TILE_SIZE: Tuple[int, int] = field(default=(settings.TILE_SIZE, settings.TILE_SIZE))
     N_TILES: Tuple[int, int] = field(default=(1, 4))
 
@@ -71,8 +79,10 @@ class TileType:
     PIPE_SIZE: Tuple[int, int] = field(
         default=(settings.PIPE_WIDTH, settings.PIPE_HEIGHT)
     )
+    PIPE_SCALE: int|Tuple[int, int] = field(default=settings.PIPE_SCALE)
     N_PIPES: Tuple[int, int] = field(default=(1, 4))
     pipes: List[pygame.Surface] = field(default_factory=list)
+    tiles: List[pygame.Surface] = field(default_factory=list)
 
     def __post_init__(self):
         self.image = pygame.image.load(
@@ -88,10 +98,25 @@ class TileType:
                         *self.PIPE_SIZE
                     )
                 ),
-                settings.PIPE_SCALE,
+                self.PIPE_SCALE,
             )
             for col in range(self.N_PIPES[1])
             for row in range(self.N_PIPES[0])
+        ]
+
+        self.tiles = [
+            pygame.transform.scale_by(
+                self.image.subsurface(
+                    pygame.Rect(
+                        (col * self.TILE_SIZE[0]) + self.TILE_POS[0],
+                        (row * self.TILE_SIZE[1]) + self.TILE_POS[1],
+                        *self.TILE_SIZE
+                    )
+                ),
+                settings.TILE_SCALE,
+            )
+            for col in range(self.N_TILES[1])
+            for row in range(self.N_TILES[0])
         ]
 
 
@@ -101,7 +126,9 @@ class TileStyle:
     @classmethod
     @property
     def Modern(self) -> TileType:
-        return TileType(BASE_TILE_PATH=self.BasePath, Tile_Name="Modern")
+        return TileType(
+            BASE_TILE_PATH=self.BasePath, Tile_Name="Modern", PIPE_SIZE=(32, 80), PIPE_SCALE=(3,2)
+        )
 
     @classmethod
     @property
@@ -117,11 +144,22 @@ class TileMap:
         self.TILE_STYLE.BasePath = self._tile_path
         self.tile_style = None
         self.pipes = []
+        self.tiles = []
 
     def setTileStyle(self, tile_type: TileType) -> "TileMap":
         self.tile_style = tile_type
         self.pipes = self.tile_style.pipes
+        self.tiles = self.tile_style.tiles
         return self
+
+    def draw_pipes(
+        self,
+        n: int,
+        groups: List[pygame.sprite.Group] | pygame.sprite.Group,
+        game: "Game",
+    ):
+        for i in range(n):
+            Pipe(game=game, pipes=self.pipes, group=groups, n=i)
 
 
 class ResourceManager:
