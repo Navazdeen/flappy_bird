@@ -47,7 +47,7 @@ class Pipe(pygame.sprite.Sprite):
                     WINDOW_WIDTH,
                     WINDOW_WIDTH + offset,
                 ),
-                -random.randint(50, 250),
+                -random.randint(150, 350),
             )
         )
 

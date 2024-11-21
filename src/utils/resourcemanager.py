@@ -14,14 +14,20 @@ if TYPE_CHECKING:
 class PlayerStyle:
     def __init__(self, PlayerPath: Path) -> None:
         self.PlayerPath: Path = PlayerPath
-        self.Modern: PlayerVariation = PlayerVariation(PlayerPath.joinpath("Modern"))
         self.Retro: PlayerVariation = PlayerVariation(PlayerPath.joinpath("Retro"))
+        self.Modern: PlayerVariation = PlayerVariation(PlayerPath.joinpath("Modern"))
 
 
 class PlayerVariation:
     def __init__(self, PlayerStylePath: Path) -> None:
         self.PlayerStylePath: Path = PlayerStylePath
         self.variation1 = self._load_variation("Bird-1.png")
+        self.variation2 = self._load_variation("Bird-2.png")
+        self.variation3 = self._load_variation("Bird-3.png")
+        self.variation4 = self._load_variation("Bird-4.png")
+        self.variation5 = self._load_variation("Bird-5.png")
+        self.variation6 = self._load_variation("Bird-6.png")
+        self.variation7 = self._load_variation("Bird-7.png")
 
     def _load_variation(self, variation: str) -> List[pygame.Surface]:
         sprite = pygame.image.load(
@@ -48,8 +54,8 @@ class PlayerVariation:
 class BackgroundStyle:
     def __init__(self, BackgroundPath: Path) -> None:
         self.BackgroundPath: Path = BackgroundPath
-        self.Modern: pygame.Surface = self._load_image("Background1.png")
-        self.Retro: pygame.Surface = self._load_image("Background2.png")
+        self.Classic: pygame.Surface = self._load_image("Background1.png")
+        self.Modern: pygame.Surface = self._load_image("Background2.png")
         self.City: pygame.Surface = self._load_image("Background3.png")
         self.CityNight: pygame.Surface = self._load_image("Background4.png")
         self.CityNightLight: pygame.Surface = self._load_image("Background5.png")
@@ -71,16 +77,24 @@ class TileType:
     BASE_TILE_PATH: Path
     Tile_Name: str
 
-    TILE_POS: Tuple[int, int] = field(default=(0, 48))
-    TILE_SIZE: Tuple[int, int] = field(default=(settings.TILE_SIZE, settings.TILE_SIZE))
-    N_TILES: Tuple[int, int] = field(default=(1, 4))
-
+    # Pipes
     PIPE_POS: Tuple[int, int] = field(default=(0, 0))
     PIPE_SIZE: Tuple[int, int] = field(
         default=(settings.PIPE_WIDTH, settings.PIPE_HEIGHT)
     )
-    PIPE_SCALE: int|Tuple[int, int] = field(default=settings.PIPE_SCALE)
+    PIPE_SCALE: Tuple[int, int] = field(
+        default=settings.PIPE_SCALE
+    )
     N_PIPES: Tuple[int, int] = field(default=(1, 4))
+
+    # Tiles
+    TILE_POS: Tuple[int, int] = field(default=(0, 48))
+    TILE_SIZE: Tuple[int, int] = field(default=(settings.TILE_SIZE, settings.TILE_SIZE))
+    TILE_SCALE: Tuple[int, int] = field(
+        default=settings.TILE_SCALE
+    )
+    N_TILES: Tuple[int, int] = field(default=(1, 4))
+
     pipes: List[pygame.Surface] = field(default_factory=list)
     tiles: List[pygame.Surface] = field(default_factory=list)
 
@@ -113,7 +127,7 @@ class TileType:
                         *self.TILE_SIZE
                     )
                 ),
-                settings.TILE_SCALE,
+                self.TILE_SCALE,
             )
             for col in range(self.N_TILES[1])
             for row in range(self.N_TILES[0])
@@ -127,7 +141,13 @@ class TileStyle:
     @property
     def Modern(self) -> TileType:
         return TileType(
-            BASE_TILE_PATH=self.BasePath, Tile_Name="Modern", PIPE_SIZE=(32, 80), PIPE_SCALE=(3,2)
+            BASE_TILE_PATH=self.BasePath,
+            Tile_Name="Modern",
+            PIPE_SIZE=(32, 80),
+            PIPE_SCALE=(3, 2),
+            TILE_POS=(0, 80),
+            TILE_SIZE=(32, 32),
+            TILE_SCALE=(3, 2),
         )
 
     @classmethod
@@ -174,6 +194,7 @@ class ResourceManager:
             BackgroundPath=self.assets_folder.joinpath("Background")
         )
         self.tilemap = TileMap(self.assets_folder.joinpath("Tiles"))
+        self.icon = pygame.image.load(self.assets_folder.joinpath("icon.png"))
 
 
 if __name__ == "__main__":
@@ -181,4 +202,4 @@ if __name__ == "__main__":
     disp = pygame.display.set_mode((800, 600))
     rm = ResourceManager()
     print(rm.player_resouce.Modern.variation1)
-    print(rm.backgrounds.Modern)
+    print(rm.backgrounds.Classic)
